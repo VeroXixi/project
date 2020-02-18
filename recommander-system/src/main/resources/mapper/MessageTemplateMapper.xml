@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.recommendersystem.dao.MessageTemplateMapper" >
+  <resultMap id="BaseResultMap" type="com.example.recommendersystem.entity.MessageTemplate" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="template" property="template" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from message_template
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.example.recommendersystem.entity.MessageTemplate" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into message_template (`template`)
+    values (#{template,jdbcType=VARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.example.recommendersystem.entity.MessageTemplate" >
+    update message_template
+    set `template` = #{template,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, `template`
+    from message_template
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, `template`
+    from message_template
+  </select>
+
+
+  <select id="getTemplates" resultMap="BaseResultMap">
+    select id, `template`
+    from message_template
+    limit #{offset},#{pageSize}
+  </select>
+
+  <select id="countTemplate" resultType="int">
+    select count(*)
+    from message_template
+  </select>
+  <select id="selectByIds" resultType="string">
+    select `template`
+    from message_template
+    where id in
+    <foreach collection="ids" item="item" separator="," open="(" close=")">
+      #{item}
+    </foreach>
+  </select>
+</mapper>

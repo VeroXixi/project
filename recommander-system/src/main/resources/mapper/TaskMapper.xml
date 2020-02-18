@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.recommendersystem.dao.TaskMapper" >
+  <resultMap id="BaseResultMap" type="com.example.recommendersystem.entity.Task" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="task_type" property="taskType" jdbcType="INTEGER" />
+    <result column="begin_time" property="beginTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="operation_id" property="operationId" jdbcType="INTEGER" />
+    <result column="task_status" property="taskStatus" jdbcType="INTEGER" />
+    <result column="message_template_ids" property="messageTemplateIds" jdbcType="VARCHAR" />
+    <result column="phone_template_ids" property="phoneTemplateIds" jdbcType="VARCHAR" />
+    <result column="tasklist_id" property="taskListId" jdbcType="INTEGER" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from task
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.example.recommendersystem.entity.Task" >
+    insert into task (id, user_id, task_type, 
+      begin_time, end_time, operation_id, 
+      task_status, message_template_ids, phone_template_ids,
+      tasklist_ids)
+    values (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{taskType,jdbcType=INTEGER},
+      #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{operationId,jdbcType=INTEGER}, 
+      #{taskStatus,jdbcType=INTEGER}, #{messageTemplateIds,jdbcType=VARCHAR}, #{phoneTemplateIds,jdbcType=VARCHAR},
+      #{tasklistId,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.example.recommendersystem.entity.Task" >
+    update task
+    set user_id = #{userId,jdbcType=VARCHAR},
+      task_type = #{taskType,jdbcType=INTEGER},
+      begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      operation_id = #{operationId,jdbcType=INTEGER},
+      task_status = #{taskStatus,jdbcType=INTEGER},
+      message_template_ids = #{messageTemplateId,jdbcType=VARCHAR},
+      phone_template_ids = #{phoneTemplateId,jdbcType=VARCHAR},
+      tasklist_id = #{tasklistId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select id, user_id, task_type, target, begin_time, end_time, operation_id, task_status, message_template_ids,
+    phone_template_ids, tasklist_id
+    from task
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, user_id, task_type, begin_time, end_time, operation_id, task_status, message_template_ids,
+    phone_template_ids, tasklist_id
+    from task
+  </select>
+  <insert id="createTasks">
+    insert into task(id,user_id,task_type,begin_time,end_time,operation_id,task_status,tasklist_id,message_template_ids,phone_template_ids, target)
+    values
+    <foreach collection="userIds" item="item" separator=",">
+    (REPLACE(UUID(),"-",""),#{item},#{taskType},#{startDate},#{endDate},#{operationId},#{taskStatus},#{taskListId},#{messTempIds},#{phoneTempIds},#{target})
+    </foreach>
+  </insert>
+
+  <insert id="createSingleTask">
+    insert into task(id,user_id,task_type,begin_time,end_time,operation_id,task_status,tasklist_id,message_template_ids,phone_template_ids,target)
+    values (REPLACE(UUID(),"-",""),#{userId},#{taskType},#{startDate},#{endDate},#{operationId},#{taskStatus},#{taskListId},#{messTempIds},#{phoneTempIds},#{target})
+  </insert>
+
+  <select id="getTasks" resultMap="BaseResultMap">
+    select id, user_id, task_type, target, begin_time, end_time, operation_id, task_status, message_template_ids,
+    phone_template_ids, tasklist_id
+    from task
+    <where>
+      <if test="taskListId!=null">
+        tasklist_id = #{taskListId}
+      </if>
+      <if test="operationId!=null">
+        and operation_id = #{operationId}
+      </if>
+      and task_status = 2
+    </where>
+    limit #{offset},#{pageSize}
+  </select>
+
+  <select id="countTask" resultType="int">
+    select count(*)
+    from task
+    <where>
+      <if test="taskListId!=null">
+        tasklist_id = #{taskListId}
+      </if>
+      <if test="operationId!=null">
+      and operation_id = #{operationId}
+      </if>
+      and task_status = 2
+    </where>
+  </select>
+  <update id="done">
+    update task
+    set
+      task_status = 3
+    where id = #{taskId}
+  </update>
+  <select id="getListId" resultType="int">
+    select tasklist_id
+    from task
+    where id = #{taskId}
+  </select>
+  <update id="startTasks">
+    update task
+    set task_status = 2
+    where tasklist_id in
+    <foreach collection="listId" separator="," open="(" close=")" item="listId">
+      #{listId}
+    </foreach>
+  </update>
+
+  <update id="endTasks">
+    update task
+    set task_status = 4
+    where tasklist_id in
+    <foreach collection="listId" separator="," open="(" close=")" item="listId">
+      #{listId}
+    </foreach>
+    and task_status = 2
+  </update>
+
+  <select id="getTaskByUser" resultType="string">
+    select id
+    from task
+    where user_id = #{userId} and task_status = 2
+  </select>
+  <select id="getTargetById" resultType="int">
+    select target
+    from task
+    where id = #{taskId}
+  </select>
+
+</mapper>

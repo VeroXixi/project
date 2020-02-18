@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.recommendersystem.dao.UsercMapper" >
+  <resultMap id="BaseResultMap" type="com.example.recommendersystem.entity.Userc" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="service_type" property="serviceType" jdbcType="INTEGER" />
+    <result column="user_type" property="userType" jdbcType="INTEGER" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from userc
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.example.recommendersystem.entity.Userc" >
+    insert into userc (id, `name`, phone,
+      service_type, user_type)
+    values ( REPLACE(UUID(),"-",""), #{name,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR},
+      #{serviceType,jdbcType=INTEGER}, #{userType,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.example.recommendersystem.entity.Userc" >
+    update userc
+    set `name` = #{name,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      service_type = #{serviceType,jdbcType=INTEGER},
+      user_type = #{userType,jdbcType=INTEGER}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select id, `name`, phone, service_type, user_type
+    from userc
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, `name`, phone, service_type, user_type
+    from userc
+  </select>
+
+  <select id="getUsercList" resultMap="BaseResultMap">
+    select id, `name`, phone, service_type, user_type
+    from userc
+    <where>
+      <if test="name!=null">
+        `name` like CONCAt('%',#{name},'%')
+      </if>
+      <if test="phone != null">
+        and phone like  CONCAt('%',#{phone},'%')
+      </if>
+      <if test="serviceTypes != null and serviceTypes.size()>0">
+        and service_type IN 
+        <foreach collection="serviceTypes" open="(" close=")" item="serviceType" separator=",">
+          #{serviceType}
+        </foreach>
+      </if>
+      <if test="userTypes != null and userTypes.size()>0">
+        and  user_type IN
+        <foreach collection="userTypes" open="(" close=")" item="userType" separator=",">
+          #{userType}
+        </foreach>
+      </if>
+    </where>
+    <if test="offset!=null and pagesize!=null">
+      limit #{offset}, #{pagesize}
+    </if>
+  </select>
+
+  <select id="countUsercList" resultType="int">
+    select count(*)
+    from userc
+    <where>
+      <if test="name!=null">
+        `name` like CONCAt('%',#{name},'%')
+      </if>
+      <if test="phone != null">
+        and phone like  CONCAt('%',#{phone},'%')
+      </if>
+      <if test="serviceTypes != null and serviceTypes.size()>0">
+        and service_type IN
+        <foreach collection="serviceTypes" open="(" close=")" item="serviceType" separator=",">
+          #{serviceType}
+        </foreach>
+      </if>
+      <if test="userTypes != null and userTypes.size()>0">
+        and  user_type IN
+        <foreach collection="userTypes" open="(" close=")" item="userType" separator=",">
+          #{userType}
+        </foreach>
+      </if>
+    </where>
+  </select>
+
+  <select id="getUserByPhone" resultType="string">
+    select id
+    from userc
+    where phone = #{phone}
+  </select>
+
+  <update id="changeStatusById">
+    update userc
+    set user_type = #{userStatus}
+    where id = #{id}
+  </update>
+
+</mapper>

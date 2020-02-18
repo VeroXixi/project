@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.recommendersystem.dao.UserUserlistMapper" >
+  <resultMap id="BaseResultMap" type="com.example.recommendersystem.entity.UserUserlist" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="user_list_id" property="userListId" jdbcType="INTEGER" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from user_userliset
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.example.recommendersystem.entity.UserUserlist" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into user_userliset (user_id, user_list_id)
+    values (#{userId,jdbcType=INTEGER}, #{userListId,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.example.recommendersystem.entity.UserUserlist" >
+    update user_userliset
+    set user_id = #{userId,jdbcType=INTEGER},
+      user_list_id = #{userListId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, user_id, user_list_id
+    from user_userliset
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, user_id, user_list_id
+    from user_userliset
+  </select>
+
+  <insert id="addUserUserList" >
+    insert into user_userliset(user_id,user_list_id)
+    values
+    <foreach collection="ids" item="item" separator=",">
+      (#{item},
+      #{listId})
+    </foreach>
+  </insert>
+
+  <select id="getuserquantity" resultType="int">
+    select count(*) from user_userliset
+    where user_list_id = #{userListId}
+  </select>
+  <select id="findbyUserListId" resultType="string">
+    select user_id
+    from user_userliset
+    where user_list_id = #{userListId}
+  </select>
+</mapper>

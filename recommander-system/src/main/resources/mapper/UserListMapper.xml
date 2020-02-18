@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.recommendersystem.dao.UserListMapper" >
+  <resultMap id="BaseResultMap" type="com.example.recommendersystem.entity.UserList" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from user_list
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.example.recommendersystem.entity.UserList" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into user_list (`name`, create_time)
+    values (#{name,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.example.recommendersystem.entity.UserList" >
+    update user_list
+    set `name` = #{name,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, `name`, create_time
+    from user_list
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, `name`, create_time
+    from user_list
+  </select>
+  <insert id="addUserList" useGeneratedKeys="true" keyProperty="id" parameterType="com.example.recommendersystem.entity.UserList">
+    insert into user_list(`name`,create_time)
+    values(#{name,jdbcType=VARCHAR},#{createTime})
+  </insert>
+
+  <select id="findUserLists" resultMap="BaseResultMap">
+    select id, `name`, create_time
+    from user_list
+    <where>
+    <if test="listName!=null">
+      `name` like CONCAt('%',#{listname},'%')
+    </if>
+    <if test="date1!=null">
+      and createtime &gt;=#{date1}
+    </if>
+    <if test="date2!=null">
+     and createtime &lt;=#{date2}
+    </if>
+    </where>
+    limit #{offset},#{pageSize}
+  </select>
+
+  <select id="countList" resultType="int">
+    select count(*)
+    from user_list
+    <where>
+      <if test="listName!=null">
+        `name` like CONCAt('%',#{listname},'%')
+        </if>
+    <if test="date1!=null">
+      and createtime &gt;=#{date1}
+    </if>
+    <if test="date2!=null">
+      and createtime &lt;=#{date2}
+    </if>
+    </where>
+  </select>
+
+
+
+
+
+</mapper>
